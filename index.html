@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gran Steak — Cozinha Quente</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #1a1a2e; }
+    #kds {
+      background: #1a1a2e; color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+      height: 100vh; display: flex; flex-direction: column;
+      user-select: none;
+    }
+    #kds-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 28px; background: #22223a; border-bottom: 2px solid #33334a; flex-shrink: 0;
+    }
+    .logo { font-size: 20px; font-weight: 500; letter-spacing: 0.1em; color: #c8a96e; text-transform: uppercase; }
+    .clock { font-size: 32px; font-weight: 500; color: #fff; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+    #sound-btn {
+      background: #2a2a3a; border: 1px solid #44446a; color: #aaa;
+      font-size: 14px; padding: 8px 18px; border-radius: 20px; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+    }
+    #sound-btn.on { border-color: #c8a96e; color: #c8a96e; }
+
+    #kds-body {
+      flex: 1; min-height: 0;
+      display: grid; grid-template-columns: 1fr 3px 1fr;
+    }
+    .section { display: flex; flex-direction: column; padding: 20px; gap: 16px; }
+    .section-divider { background: #33334a; }
+
+    .station-header {
+      display: flex; align-items: center; gap: 14px;
+      padding-bottom: 14px; border-bottom: 2px solid #33334a; flex-shrink: 0;
+    }
+    .station-label { font-size: 30px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; }
+    .fogao-label { color: #c8a96e; }
+    .frit-label  { color: #b07de0; }
+
+    .item-grid { display: grid; gap: 14px; flex: 1; min-height: 0; grid-template-columns: 1fr; }
+
+    .item-card {
+      border-radius: 18px; padding: 0 24px;
+      display: flex; flex-direction: column; justify-content: center; gap: 14px;
+      border: 2px solid transparent;
+      cursor: pointer; transition: opacity 0.3s; flex: 1;
+    }
+    .item-card .name {
+      font-size: clamp(24px, 3.8vw, 52px);
+      font-weight: 500; line-height: 1.15; text-align: center;
+    }
+    .item-card .timer-bar-wrap { height: 7px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+    .item-card .timer-bar { height: 100%; border-radius: 4px; transition: width 1s linear; }
+    .item-card.done { opacity: 0.2; }
+    .item-card.done .name { text-decoration: line-through; }
+
+    .fogao-card { background: #2a2010; border-color: #5a4020; }
+    .fogao-card .name { color: #f0d898; }
+    .fogao-card .timer-bar { background: #c8a96e; }
+    .fogao-card.done { background: #1e1e2e; border-color: #2a2a3a; }
+
+    .frit-card { background: #221030; border-color: #4a2060; }
+    .frit-card .name { color: #d8a8f8; }
+    .frit-card .timer-bar { background: #b07de0; }
+    .frit-card.done { background: #1e1e2e; border-color: #2a2a3a; }
+
+    @keyframes flash-fogao {
+      0%,100% { background: #4a3010; border-color: #c8a96e; box-shadow: 0 0 0 3px #c8a96e44; }
+      50% { background: #c8a96e; border-color: #e8c97e; box-shadow: 0 0 40px 12px #c8a96e99; }
+    }
+    @keyframes flash-frit {
+      0%,100% { background: #3a1050; border-color: #b07de0; box-shadow: 0 0 0 3px #b07de044; }
+      50% { background: #b07de0; border-color: #c09de8; box-shadow: 0 0 40px 12px #b07de099; }
+    }
+    .fogao-card.active { animation: flash-fogao 0.85s ease-in-out infinite; }
+    .fogao-card.active .name { color: #fff; text-transform: uppercase; }
+    .frit-card.active { animation: flash-frit 0.85s ease-in-out infinite; }
+    .frit-card.active .name { color: #fff; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+<div id="kds">
+  <div id="kds-header">
+    <div class="logo">Gran Steak — Cozinha Quente</div>
+    <div id="clock-display" class="clock">--:--:--</div>
+    <button id="sound-btn" onclick="toggleSound()">
+      <i class="ti ti-volume-off" style="font-size:18px" id="sound-icon"></i>
+      <span id="sound-label">Som: off</span>
+    </button>
+  </div>
+
+  <div id="kds-body">
+    <div class="section">
+      <div class="station-header">
+        <i class="ti ti-flame" style="font-size:34px;color:#c8a96e" aria-hidden="true"></i>
+        <span class="station-label fogao-label">Fogão</span>
+      </div>
+      <div class="item-grid" id="fogao-grid"></div>
+    </div>
+    <div class="section-divider"></div>
+    <div class="section">
+      <div class="station-header">
+        <i class="ti ti-droplet" style="font-size:34px;color:#b07de0" aria-hidden="true"></i>
+        <span class="station-label frit-label">Fritadeira</span>
+      </div>
+      <div class="item-grid" id="frit-grid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // CONFIGURAÇÃO — edite aqui para alterar itens e tempos
+  // ============================================================
+  const FOGAO = [
+    { name: "Risotos",                dur: 10 },  // dur = minutos
+    { name: "Cuscuz / Farofa cebola", dur: 5  },
+    { name: "Arroz biro-biro",        dur: 5  },
+    { name: "Polenta c/ ragù",        dur: 5  },
+  ];
+  const FRIT = [
+    { name: "Cebola / Berinjela", dur: 10 },
+    { name: "Polenta / Batata",   dur: 10 },
+  ];
+  // ============================================================
+
+  function buildCum(items) {
+    let c = [0]; items.forEach(it => c.push(c[c.length-1] + it.dur * 60)); return c;
+  }
+  function getActive(items, cum, elapsed) {
+    const pos = elapsed % cum[cum.length-1];
+    for (let i = 0; i < items.length; i++) {
+      if (pos < cum[i+1]) return { idx: i, secInSlot: pos - cum[i], slotDur: items[i].dur * 60 };
+    }
+    const last = items.length - 1;
+    return { idx: last, secInSlot: 0, slotDur: items[last].dur * 60 };
+  }
+
+  const CUM_F  = buildCum(FOGAO);
+  const CUM_FR = buildCum(FRIT);
+
+  let startTime = Date.now();
+  let dF = new Set(), dFr = new Set();
+  let lastFogaoIdx = -1, lastFritIdx = -1;
+  let soundOn = false;
+  let audioCtx = null;
+
+  function toggleSound() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    soundOn = !soundOn;
+    const btn = document.getElementById('sound-btn');
+    btn.classList.toggle('on', soundOn);
+    document.getElementById('sound-label').textContent = soundOn ? 'Som: on' : 'Som: off';
+    document.getElementById('sound-icon').className = soundOn ? 'ti ti-volume' : 'ti ti-volume-off';
+    if (soundOn) beep(880, 0.1, 'sine');
+  }
+
+  function beep(freq, dur, type) {
+    if (!audioCtx || !soundOn) return;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    g.gain.setValueAtTime(0.4, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    o.start(audioCtx.currentTime);
+    o.stop(audioCtx.currentTime + dur);
+  }
+
+  function playChange() {
+    if (!audioCtx || !soundOn) return;
+    beep(880, 0.12, 'sine');
+    setTimeout(() => beep(1100, 0.18, 'sine'), 130);
+  }
+
+  function renderGrid(containerId, items, cum, doneSet, cardClass, elapsed) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    const { idx: activeIdx, secInSlot, slotDur } = getActive(items, cum, elapsed);
+    items.forEach((item, i) => {
+      const done = doneSet.has(i);
+      const active = i === activeIdx && !done;
+      const pct = active ? ((secInSlot / slotDur) * 100).toFixed(1) : (done ? 100 : 0);
+      const div = document.createElement('div');
+      div.className = 'item-card ' + cardClass + (done ? ' done' : '') + (active ? ' active' : '');
+      div.innerHTML = `
+        <div class="name">${item.name}</div>
+        <div class="timer-bar-wrap"><div class="timer-bar" style="width:${pct}%"></div></div>`;
+      div.onclick = () => { doneSet.has(i) ? doneSet.delete(i) : doneSet.add(i); render(); };
+      el.appendChild(div);
+    });
+    return activeIdx;
+  }
+
+  function render() {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const fIdx  = renderGrid('fogao-grid', FOGAO, CUM_F,  dF,  'fogao-card', elapsed);
+    const frIdx = renderGrid('frit-grid',  FRIT,  CUM_FR, dFr, 'frit-card',  elapsed);
+    if (elapsed > 2) {
+      if (fIdx !== lastFogaoIdx || frIdx !== lastFritIdx) playChange();
+    }
+    lastFogaoIdx = fIdx;
+    lastFritIdx  = frIdx;
+  }
+
+  function updateClock() {
+    const n = new Date();
+    document.getElementById('clock-display').textContent =
+      String(n.getHours()).padStart(2,'0') + ':' +
+      String(n.getMinutes()).padStart(2,'0') + ':' +
+      String(n.getSeconds()).padStart(2,'0');
+  }
+
+  setInterval(() => { render(); updateClock(); }, 1000);
+  render(); updateClock();
+</script>
+</body>
+</html>
