@@ -13,8 +13,6 @@
       font-family: system-ui, -apple-system, sans-serif;
       height: 100vh; display: flex; flex-direction: column;
       user-select: none;
-      /* Margem de segurança para TVs com overscan. Se ainda cortar, aumente os valores (ex: 4vh 4vw). Se sobrar borda demais, diminua (ex: 1vh 1vw). */
-      padding: 2.5vh 2.5vw; gap: 0;
     }
     #kds-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -44,17 +42,17 @@
     .fogao-label { color: #c8a96e; }
     .frit-label  { color: #b07de0; }
 
-    .item-grid { display: grid; gap: 10px; flex: 1; min-height: 0; grid-template-columns: 1fr; grid-auto-rows: 1fr; overflow: hidden; }
+    .item-grid { display: grid; gap: 14px; flex: 1; min-height: 0; grid-template-columns: 1fr; grid-auto-rows: 1fr; overflow: hidden; }
 
     .item-card {
-      border-radius: 14px; padding: 6px 24px;
-      display: flex; flex-direction: column; justify-content: center; gap: 8px;
+      border-radius: 18px; padding: 0 24px;
+      display: flex; flex-direction: column; justify-content: center; gap: 14px;
       border: 2px solid transparent;
       cursor: pointer; transition: opacity 0.3s; min-height: 0; overflow: hidden;
     }
     .item-card .name {
-      font-size: clamp(16px, 2.6vw, 40px);
-      font-weight: 500; line-height: 1.1; text-align: center;
+      font-size: clamp(24px, 3.8vw, 52px);
+      font-weight: 500; line-height: 1.15; text-align: center;
     }
     .item-card .timer-bar-wrap { height: 7px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
     .item-card .timer-bar { height: 100%; border-radius: 4px; transition: width 1s linear; }
