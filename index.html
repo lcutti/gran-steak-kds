@@ -13,6 +13,8 @@
       font-family: system-ui, -apple-system, sans-serif;
       height: 100vh; display: flex; flex-direction: column;
       user-select: none;
+      /* Margem de segurança para TVs com overscan. Se ainda cortar, aumente os valores (ex: 4vh 4vw). Se sobrar borda demais, diminua (ex: 1vh 1vw). */
+      padding: 2.5vh 2.5vw; gap: 0;
     }
     #kds-header {
       display: flex; align-items: center; justify-content: space-between;
